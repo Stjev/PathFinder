@@ -3,22 +3,21 @@
  */
 package pathfinder.drawers;
 
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import pathfinder.models.Coordinate;
+import pathfinder.models.Node;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BoardDrawer {
 
-    private Canvas canvas;
-    private GraphicsContext gc;
-    private HashMap<Coordinate, Chunk> chunks;
-    private Integer sideCount;
-    private double canvasSize;
+    private Pane pane;
+    private HashMap<Coordinate, Node> nodes;
+    private double paneSize;
+    private double squareSize;
 
     /**
      * TODO: Start and finish
@@ -26,104 +25,62 @@ public class BoardDrawer {
 
     /**
      * Constructor
-     * @param canvas, the canvas to draw on.
      */
-    public BoardDrawer(Canvas canvas){
-        this.canvas = canvas;
-        // Since the canvas is a square, the height and width are the same size
-        this.canvasSize = canvas.getHeight();
-        gc = this.canvas.getGraphicsContext2D();
-
-        initializeGraphicsContext();
-        initializeDrawingEvent();
-    }
-
-    private void initializeDrawingEvent() {
-        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::mouseDraw);
-        canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseDraw);
-    }
-
-    /**
-     * Is called when a mouse is dragged or clicked
-     */
-    private void mouseDraw(MouseEvent event) {
-        double x = event.getX(), y = event.getY();
-        if(this.sideCount != null && x < canvasSize && y < canvasSize && x > 0 && y > 0) {
-            // round off the values
-            x = x - (x % (canvasSize / sideCount));
-            y = y - (y % (canvasSize / sideCount));
-
-            // Generate a coordinate for this posititon
-            Coordinate coord = new Coordinate(x, y);
-
-            Chunk chunk = chunks.get(coord);
-
-            // Check which button is pressed
-            if(event.getButton().equals(MouseButton.PRIMARY)) {
-                if(! chunk.isObstacle()) {
-                    // Set the color to the colors of an obstacle
-                    gc.setFill(Color.BLUE);
-                    // Draw this chunk
-                    chunk.setAsObstacle(true);
-                    chunk.draw();
-                    // Set the color back to the colors of a path chunk
-                    gc.setFill(Color.GREEN);
-                }
-            } else if(event.getButton().equals(MouseButton.SECONDARY)) {
-                if(chunk.isObstacle()) {
-                    // This will delete the chunk
-                    chunk.delete();
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets the values for the graphics context
-     */
-    private void initializeGraphicsContext() {
-        gc.setFill(Color.GREEN);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(1);
+    public BoardDrawer(Pane pane){
+        this.pane = pane;
+        // Since the canvas is a square, the height and width are the same SIZE
+        this.paneSize = pane.getPrefHeight();
     }
 
     /**
      * Draws the board
      * @param sideCount: The amount of blocks in one row / column.
      */
-    public HashMap<Coordinate, Chunk> drawNewBoard(int sideCount) {
-        // Clear the canvas first
-        gc.clearRect(0, 0, canvasSize, canvasSize);
-
-        this.sideCount = sideCount;
-
+    public HashMap<Coordinate, Node> drawNewBoard(int sideCount) {
+        // Clear the pane first
+        pane.getChildren().clear();
         // Since a canvas is always square, the canvas height is equal to it's width
-        double squareSize = canvasSize / sideCount;
+        this.squareSize = (paneSize / sideCount);
 
-        chunks = new HashMap<>();
+        nodes = new HashMap<>();
 
         // These loops generate the pathChunks
-        int rowCounter = 0, colCounter = 0;
-        for(double row = 0; row <= canvasSize; row += squareSize) {
-            for(double col = 0; col <= canvasSize; col += squareSize) {
+        int rowCounter = 0;
+        for(double row = 0; row <= paneSize; row += squareSize) {
+            int colCounter = 0;
+            for(double col = 0; col <= paneSize; col += squareSize) {
                 // Generate a coordinate for this posititon
-                Coordinate coord = new Coordinate(col, row, rowCounter, colCounter);
-                // Generate a path chunk for this position
-                Chunk chunk = new Chunk(coord, gc, squareSize);
+                Coordinate coord = new Coordinate(rowCounter, colCounter);
+                // Generate a node for this position and draw it.
+                Node node = new Node(row, col, squareSize, squareSize);
+                node.setCoordinate(coord);
+                // Put the node in the map
+                nodes.put(coord, node);
 
-                chunks.put(coord, chunk);
-                colCounter += 0;
+                /**
+                 * TODO: Adds nodes, that are k*32 rows after this node for some reason.
+                 */
+                for(Coordinate neighbour : coord.getNeighbours()) {
+                    if(nodes.keySet().contains(neighbour)) {
+                        node.addNeighbour(nodes.get(neighbour));
+                        nodes.get(neighbour).addNeighbour(node);
+                    }
+                }
+                // Add the node to the pane
+                pane.getChildren().add(node);
+
+                colCounter += 1;
             }
             rowCounter += 1;
         }
 
-        return chunks;
+        return nodes;
     }
 
     /**
      * Get the map of the chunks
      */
-    public HashMap<Coordinate, Chunk> getChunks() {
-        return chunks;
+    public HashMap<Coordinate, Node> getChunks() {
+        return nodes;
     }
 }

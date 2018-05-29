@@ -3,37 +3,41 @@
  */
 package pathfinder.models;
 
+import pathfinder.Constants;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Coordinate {
-    private final double x, y;
-    private final int rowNumber, colNumber;
+    private final int row, col;
 
-    public Coordinate(double x, double y) {
-        this(x, y, 0, 0);
+    public Coordinate(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
-    public Coordinate(double x, double y, int rowNumber, int colNumber) {
-        this.x = x;
-        this.y = y;
-        this.rowNumber = rowNumber;
-        this.colNumber = colNumber;
+    public int getRow() {
+        return row;
     }
 
-    public double getX() {
-        return x;
+    public int getCol() {
+        return col;
     }
 
-    public double getY() {
-        return y;
-    }
+    /**
+     * Returns a set of neighbours
+     * @return
+     */
+    public Set<Coordinate> getNeighbours() {
+        Set<Coordinate> neighbours = new HashSet<>();
 
-    public int getRowNumber() {
-        return rowNumber;
-    }
+        if(row - 1 >= 0) neighbours.add(new Coordinate(row - 1, col));
+        if(row + 1 < Constants.SIZE) neighbours.add(new Coordinate(row + 1, col));
+        if(col - 1 >= 0) neighbours.add(new Coordinate(row, col - 1));
+        if(col + 1 < Constants.SIZE) neighbours.add(new Coordinate(row, col + 1));
 
-    public int getColNumber() {
-        return colNumber;
+        return neighbours;
     }
 
     /**
@@ -41,11 +45,16 @@ public class Coordinate {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(row, col);
     }
 
     @Override
     public boolean equals(Object o) {
         return o instanceof Coordinate && this.hashCode() == o.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "row: " + row + " - col: " + col;
     }
 }

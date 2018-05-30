@@ -61,6 +61,7 @@ public class AStarAlgorithm implements Algorithm {
 
         // Does the algorithm need to be instant
         if(instant) {
+            // TODO: Werkt alleen als de code in de loop staat
             while (! toEvaluate.isEmpty()) {
                 doStep();
             }

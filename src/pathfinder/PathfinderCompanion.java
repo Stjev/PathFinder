@@ -16,8 +16,7 @@ public class PathfinderCompanion {
         boardDrawer = new BoardDrawer(pane);
         boardDrawer.drawNewBoard();
 
-        new AStarAlgorithm().run(boardDrawer.getNodes(), boardDrawer.getStart(), boardDrawer.getFinish());
-
         btnNewBoard.setOnAction(e -> boardDrawer.drawNewBoard());
+        btnRun.setOnAction(e -> new AStarAlgorithm().run(boardDrawer.getNodes(), boardDrawer.getStart(), boardDrawer.getFinish(), false));
     }
 }

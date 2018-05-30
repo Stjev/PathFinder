@@ -6,11 +6,13 @@ package pathfinder.drawers;
 import javafx.scene.layout.Pane;
 import pathfinder.Constants;
 import pathfinder.models.Coordinate;
+import pathfinder.models.Cubes.Cube;
 import pathfinder.models.Cubes.Finish;
 import pathfinder.models.Cubes.Node;
 import pathfinder.models.Cubes.Start;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class BoardDrawer {
 
@@ -20,10 +22,6 @@ public class BoardDrawer {
     private double squareSize;
     private Start start;
     private Finish finish;
-
-    /**
-     * TODO: Start and FINISH
-     */
 
     /**
      * Constructor
@@ -38,10 +36,32 @@ public class BoardDrawer {
      * Draw the start and the finish
      */
     private void drawStartAndFinish() {
+        // Generate a start and set it's coordinate
         start = new Start(0, 0, squareSize, squareSize);
-        finish = new Finish(paneSize - squareSize, paneSize - squareSize, squareSize, squareSize);
+        start.setCoordinate(new Coordinate(0, 0));
+        start.getCoordinate().getNeighbours().forEach(c -> replaceNeighbour(start, nodes.get(c)));
 
+        // Generate a finish and set it's coordinate
+        finish = new Finish(paneSize - squareSize, paneSize - squareSize, squareSize, squareSize);
+        finish.setCoordinate(new Coordinate(Constants.SIZE - 1, Constants.SIZE - 1));
+        finish.getCoordinate().getNeighbours().forEach(c -> replaceNeighbour(finish, nodes.get(c)));
+
+        pane.getChildren().removeAll(
+                nodes.get(start.getCoordinate()),
+                nodes.get(finish.getCoordinate())
+        );
+
+        // Display both of them
         pane.getChildren().addAll(start, finish);
+    }
+
+    /**
+     * Method to replace the neighbours of a node
+     */
+    private void replaceNeighbour(Cube newNeighbour, Cube replaceNeighboursCube) {
+        newNeighbour.addNeighbour(replaceNeighboursCube);
+        replaceNeighboursCube.deleteNeighbourByCoordinate(newNeighbour.getCoordinate());
+        replaceNeighboursCube.addNeighbour(newNeighbour);
     }
 
     public Start getStart() {
@@ -55,7 +75,7 @@ public class BoardDrawer {
     /**
      * Draws the board
      */
-    public HashMap<Coordinate, Node> drawNewBoard() {
+    public void drawNewBoard() {
         // Clear the pane first
         pane.getChildren().clear();
         // Since a canvas is always square, the canvas height is equal to it's width
@@ -64,14 +84,12 @@ public class BoardDrawer {
         nodes = new HashMap<>();
 
         // These loops generate the pathChunks
-        int rowCounter = 0;
-        for(double row = 0; row <= paneSize; row += squareSize) {
-            int colCounter = 0;
-            for(double col = 0; col <= paneSize; col += squareSize) {
+        for(int row = 0; row < Constants.SIZE; row += 1) {
+            for(int col = 0; col < Constants.SIZE; col += 1) {
                 // Generate a coordinate for this posititon
-                Coordinate coord = new Coordinate(rowCounter, colCounter);
+                Coordinate coord = new Coordinate(row, col);
                 // Generate a node for this position and draw it.
-                Node node = new Node(col, row, squareSize, squareSize);
+                Node node = new Node(col * squareSize, row * squareSize, squareSize, squareSize);
                 node.setCoordinate(coord);
 
                 for(Coordinate neighbour : coord.getNeighbours()) {
@@ -85,19 +103,16 @@ public class BoardDrawer {
                 nodes.put(coord, node);
                 // Add the node to the pane
                 pane.getChildren().add(node);
-                colCounter += 1;
             }
-            rowCounter += 1;
         }
 
         drawStartAndFinish();
-        return nodes;
     }
 
     /**
      * Get the map of the chunks
      */
-    public HashMap<Coordinate, Node> getNodes() {
-        return nodes;
+    public HashSet<Node> getNodes() {
+        return new HashSet<>(nodes.values());
     }
 }

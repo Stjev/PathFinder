@@ -11,7 +11,6 @@ import javafx.scene.paint.Paint;
 import pathfinder.Constants;
 
 public class Node extends Cube implements EventHandler<MouseEvent>{
-    private boolean obstacle = false;
 
     public Node(double x, double y, double width, double height) {
         super(x, y, width, height);
@@ -20,23 +19,6 @@ public class Node extends Cube implements EventHandler<MouseEvent>{
 
     private void init(){
         addHandlers();
-    }
-
-    public boolean isObstacle() {
-        return obstacle;
-    }
-
-    // Set the node as an OBSTACLE and colors it likewise
-    private void setObstacle(boolean obstacle) {
-        if(obstacle && ! this.obstacle) {
-            // Color the node like an OBSTACLE
-            setFill(Constants.OBSTACLE);
-        } else if(! obstacle && this.obstacle) {
-            // This set the node as a normal, empty node
-            setFill(Color.WHITE);
-        }
-
-        this.obstacle = obstacle;
     }
 
     /**

@@ -13,6 +13,7 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("pathfinder.fxml"));
         primaryStage.setTitle("Pathfinder V2");
         primaryStage.setScene(new Scene(root));
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

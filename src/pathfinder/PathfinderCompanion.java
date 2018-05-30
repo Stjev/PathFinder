@@ -2,6 +2,7 @@ package pathfinder;
 
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
+import pathfinder.algorithms.AStarAlgorithm;
 import pathfinder.drawers.BoardDrawer;
 
 public class PathfinderCompanion {
@@ -12,9 +13,11 @@ public class PathfinderCompanion {
     private BoardDrawer boardDrawer;
 
     public void initialize(){
-        this.boardDrawer = new BoardDrawer(pane);
-        this.boardDrawer.drawNewBoard(Constants.SIZE);
+        boardDrawer = new BoardDrawer(pane);
+        boardDrawer.drawNewBoard();
 
-        btnNewBoard.setOnAction(e -> boardDrawer.drawNewBoard(Constants.SIZE));
+        new AStarAlgorithm().run(boardDrawer.getNodes(), boardDrawer.getStart(), boardDrawer.getFinish());
+
+        btnNewBoard.setOnAction(e -> boardDrawer.drawNewBoard());
     }
 }

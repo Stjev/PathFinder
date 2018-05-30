@@ -4,13 +4,13 @@
 package pathfinder.drawers;
 
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
+import pathfinder.Constants;
 import pathfinder.models.Coordinate;
-import pathfinder.models.Node;
+import pathfinder.models.Cubes.Finish;
+import pathfinder.models.Cubes.Node;
+import pathfinder.models.Cubes.Start;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class BoardDrawer {
 
@@ -18,9 +18,11 @@ public class BoardDrawer {
     private HashMap<Coordinate, Node> nodes;
     private double paneSize;
     private double squareSize;
+    private Start start;
+    private Finish finish;
 
     /**
-     * TODO: Start and finish
+     * TODO: Start and FINISH
      */
 
     /**
@@ -33,14 +35,31 @@ public class BoardDrawer {
     }
 
     /**
-     * Draws the board
-     * @param sideCount: The amount of blocks in one row / column.
+     * Draw the start and the finish
      */
-    public HashMap<Coordinate, Node> drawNewBoard(int sideCount) {
+    private void drawStartAndFinish() {
+        start = new Start(0, 0, squareSize, squareSize);
+        finish = new Finish(paneSize - squareSize, paneSize - squareSize, squareSize, squareSize);
+
+        pane.getChildren().addAll(start, finish);
+    }
+
+    public Start getStart() {
+        return start;
+    }
+
+    public Finish getFinish() {
+        return finish;
+    }
+
+    /**
+     * Draws the board
+     */
+    public HashMap<Coordinate, Node> drawNewBoard() {
         // Clear the pane first
         pane.getChildren().clear();
         // Since a canvas is always square, the canvas height is equal to it's width
-        this.squareSize = (paneSize / sideCount);
+        this.squareSize = (paneSize / Constants.SIZE);
 
         nodes = new HashMap<>();
 
@@ -52,35 +71,33 @@ public class BoardDrawer {
                 // Generate a coordinate for this posititon
                 Coordinate coord = new Coordinate(rowCounter, colCounter);
                 // Generate a node for this position and draw it.
-                Node node = new Node(row, col, squareSize, squareSize);
+                Node node = new Node(col, row, squareSize, squareSize);
                 node.setCoordinate(coord);
-                // Put the node in the map
-                nodes.put(coord, node);
 
-                /**
-                 * TODO: Adds nodes, that are k*32 rows after this node for some reason.
-                 */
                 for(Coordinate neighbour : coord.getNeighbours()) {
-                    if(nodes.keySet().contains(neighbour)) {
+                    if(nodes.containsKey(neighbour)) {
                         node.addNeighbour(nodes.get(neighbour));
                         nodes.get(neighbour).addNeighbour(node);
                     }
                 }
+
+                // Put the node in the map
+                nodes.put(coord, node);
                 // Add the node to the pane
                 pane.getChildren().add(node);
-
                 colCounter += 1;
             }
             rowCounter += 1;
         }
 
+        drawStartAndFinish();
         return nodes;
     }
 
     /**
      * Get the map of the chunks
      */
-    public HashMap<Coordinate, Node> getChunks() {
+    public HashMap<Coordinate, Node> getNodes() {
         return nodes;
     }
 }

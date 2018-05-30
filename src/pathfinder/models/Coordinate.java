@@ -27,7 +27,6 @@ public class Coordinate {
 
     /**
      * Returns a set of neighbours
-     * @return
      */
     public Set<Coordinate> getNeighbours() {
         Set<Coordinate> neighbours = new HashSet<>();
@@ -50,7 +49,11 @@ public class Coordinate {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Coordinate && this.hashCode() == o.hashCode();
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coordinate that = (Coordinate) o;
+        return row == that.row &&
+                col == that.col;
     }
 
     @Override
